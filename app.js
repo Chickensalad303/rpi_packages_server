@@ -1,6 +1,7 @@
 const express = require("express")
 const app = express()
 var bodyParser = require("body-parser")
+const e = require("express")
 
 const sqlite3 = require("sqlite3").verbose()
 
@@ -57,6 +58,43 @@ function updateDB(database_instance, nameArray) {
 }
 
 
+function updateArray(newData) {
+
+    var stored_array = ["tim", "toby", "peter"]
+    console.log(stored_array)
+    //all names that aren't in the duplicates get put in here
+   
+    
+
+    //this doesn't work, next time just make all in stored_array lowercase & 
+    //do same for all newData -> then just concat()
+
+    for (let i = 0; i < newData.length; i++) {
+        let newString = newData[i]
+
+        for (let o = 0; o < stored_array.length; o++) {
+            let oldString = stored_array[o]
+
+            if (newString.toLowerCase() === oldString.toLowerCase()) {
+                //if name already displayed, return error message
+                console.log(oldString, newString)
+                break
+            }   
+            
+            console.log(newString + " to add")
+        }
+
+    }
+    console.log(stored_array)
+
+    // console.log(tempArray)
+    // stored_array = stored_array.concat(newData)
+
+    // console.log(stored_array)
+
+}
+
+
 
 router.get("/", (req, res) => {
 
@@ -88,8 +126,10 @@ router.post("/", (req, res) => {
         message: `${req.body.names}`
     })
     
-    updateDB(db, req.body.names)
-
+    //update database
+    // updateDB(db, req.body.names)
+    //add function here to load new data into webpage
+    updateArray(req.body.names)
 })
 
 app.use("/api", router)
