@@ -1,7 +1,6 @@
 const express = require("express")
 const app = express()
 var bodyParser = require("body-parser")
-const e = require("express")
 
 const sqlite3 = require("sqlite3").verbose()
 
@@ -21,21 +20,42 @@ const db = new sqlite3.Database("./database.db", (err) => {
 
     console.log("connected to database")
 })
-db.serialize( () => {
-    db.run("CREATE TABLE IF NOT EXISTS namelist (id INT, name TEXT)")
 
-    db.run("INSERT INTO namelist VALUES (1, 'tim')")
-    db.run("INSERT INTO namelist VALUES (2, 'bob')")
-    db.run("INSERT INTO namelist VALUES (3, 'bob')")
 
-    // var insert = `INSERT INTO namelist VALUES (${i}, '${name}')`
-    
-    // for (let i = 0; i < 10; i++) {
-    //     db.run(`INSERT INTO namelist VALUES (${i}, 'tim')`)
-    // }
+function insertNewValuesDB(insertArray) {
+    db.serialize( () => {
+        
+        db.run("CREATE TABLE IF NOT EXISTS namelist (name TEXT)")
+        
+        //insert values from the recieved array
+        for (let i of insertArray) {
+            db.run(`INSERT INTO namelist VALUES ('${i}')`)
+        }
+        db.all("SELECT rowid, * FROM namelist", (err, row) => {
+            console.log(row)
+        })
 
-})
 
+        //ignore duplicates users fault    
+    })
+
+}
+
+function deleteValuesDB(insertArray) {
+    db.serialize( () => {
+        //might need to change this to delete using rowid so that user doesn't delete multiple with same name
+        for (let i of insertArray) {
+
+            db.run(`DELETE FROM namelist WHERE name = '${i}'`)
+        }
+
+        db.all("SELECT rowid, * FROM namelist", (err, row) => {
+            console.log(row)
+        })
+
+    })
+
+}
 
 function updateDB(database_instance, nameArray) {
     database_instance.serialize( () => {
@@ -58,87 +78,145 @@ function updateDB(database_instance, nameArray) {
 }
 
 
-function updateArray(newData) {
+function removeDuplicates(newData) {
 
     var stored_array = ["tim", "toby", "peter"]
+    //make every value in stored_array lowercase... as a safeguard for me forgetting to store them as lowercase only
+    stored_array.forEach( (element, index) => {
+        stored_array[index] = element.toLowerCase()
+    })
+
+
     console.log(stored_array)
-    //all names that aren't in the duplicates get put in here
-   
+
     
+    //all new names in lowercase go in here
+    var tempArray = []
+    tempArray = tempArray.concat(newData)
 
-    //this doesn't work, next time just make all in stored_array lowercase & 
-    //do same for all newData -> then just concat()
-
-    for (let i = 0; i < newData.length; i++) {
-        let newString = newData[i]
-
-        for (let o = 0; o < stored_array.length; o++) {
-            let oldString = stored_array[o]
-
-            if (newString.toLowerCase() === oldString.toLowerCase()) {
-                //if name already displayed, return error message
-                console.log(oldString, newString)
-                break
-            }   
-            
-            console.log(newString + " to add")
+    
+    const mergedArray = stored_array.concat(tempArray)
+    const result = mergedArray.filter( (item, idx) => {
+        
+        let stringToCompare = item.toLowerCase()
+        if (mergedArray.indexOf(stringToCompare) === idx) {
+            return item
         }
+    })
 
-    }
-    console.log(stored_array)
 
-    // console.log(tempArray)
-    // stored_array = stored_array.concat(newData)
+    console.log(result)
 
-    // console.log(stored_array)
 
 }
 
 
 
-router.get("/", (req, res) => {
 
+
+
+
+
+
+const logger = function (req, res, next) {
+    console.log(req.method.toLowerCase())
+
+    if (req.method.toLowerCase() === "get") {
+        
+            const options = {
+                method: 'POST',
+                body: '{"names":["hi","tiM","tom","toby"],"device":"test"}'
+              };
+              
+              fetch('http://192.168.178.20:3000/api', options)
+                // .then(response => response.json())
+                // .then(response => console.log(response))
+                .catch(err => console.error(err));
+        
+                
+            //this gets sent to webpage @localhost:3000/api which teh screen will display after any request sent to /api
+            // but we only want to respond in this function if its a get request, in order to display on webpage
+            //this gets skipped if its a post request & continues @ router.post
+            res.send('hi')
+
+
+    }
+
+
+    next()
+}
+// router.use(logger)
+
+router.get("/", (req, res) => {
+    res.send("get req")
 })
 
-router.post("/", (req, res) => {
+router.post("/", (req, res, next) => {
     console.log(req.body)
 
 
-    if (!req.body.names) {
-        res.json({
-            valid: false,
-            message: "names array missing"
-        })
-        return;
-    };
+    //check if recieved content can be used -- do later
 
-    if (!req.body.names.length > 0){
-        res.json({
-            valid: false,
-            message: "array is empty"
-        })
-        return;
+    // if (!req.body.names) {
+    //     res.json({
+    //         valid: false,
+    //         message: "names array missing"
+    //     })
+    //     return;
+    // };
+
+    // if (!req.body.names.length > 0){
+    //     res.json({
+    //         valid: false,
+    //         message: "array is empty"
+    //     })
+    //     return;
+    // }
+
+    if (req.body.action === "delete") {
+        deleteValuesDB(req.body.delete)
+
     }
+    
+    if(req.body.action === "add"){
+        insertNewValuesDB(req.body.names)
 
+    }
     
     res.json({
         valid: true,
-        message: `${req.body.names}`
+        message: `${req.body.names} : ${req.body.delete} \n ${req.body.action}`
     })
-    
+
+
+
+
     //update database
     // updateDB(db, req.body.names)
+    //removeDuplicates(req.body.names)
     //add function here to load new data into webpage
-    updateArray(req.body.names)
+    
 })
 
 app.use("/api", router)
 
-app.get("/", (req, res) => [
-    res.send("wazaap")
-])
+app.get("/", (req, res) => {
+
+    
+})
+
+// app.post("/", (req, res) => {
+//     console.log("wazaap")
+
+// })
+
+
+
+
 //by  adding ip adress eg 192.168.178.40 for rpi makes it public on local network -- app.listen(Port Number, "Your IP Address");
 
 app.listen(port, () => {
     console.log(`listening on port ${port}`)
 })
+
+
