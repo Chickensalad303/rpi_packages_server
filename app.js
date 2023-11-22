@@ -53,8 +53,32 @@ function deleteValuesDB(insertArray) {
             console.log(row)
         })
 
+        //use this in the final implimentation        
+
     })
 
+}
+
+// const requestValuesDB = db.serialize( () => {
+//     var t = []
+//     db.all("SELECT * FROM namelist", (err, rows) => {
+//         //returns array, each entry is a single entry of the db as an
+//         t = rows
+//         console.log(rows)
+//     })
+//     return t
+// })
+
+function requestValuesDB() {
+    let returnValue;
+    db.serialize( () => {
+        db.all("SELECT * FROM namelist", (err, rows) => {
+            //returns array, each entry is a single entry of the db as an
+            console.log("hi",rows)
+            returnValue = rows
+        })
+    })
+    return returnValue;
 }
 
 function updateDB(database_instance, nameArray) {
@@ -112,12 +136,6 @@ function removeDuplicates(newData) {
 
 
 
-
-
-
-
-
-
 const logger = function (req, res, next) {
     console.log(req.method.toLowerCase())
 
@@ -147,9 +165,7 @@ const logger = function (req, res, next) {
 }
 // router.use(logger)
 
-router.get("/", (req, res) => {
-    res.send("get req")
-})
+
 
 router.post("/", (req, res, next) => {
     console.log(req.body)
@@ -191,31 +207,46 @@ router.post("/", (req, res, next) => {
 
 
 
-    //update database
-    // updateDB(db, req.body.names)
-    //removeDuplicates(req.body.names)
-    //add function here to load new data into webpage
-    
 })
 
+
+//use [ipadress]:[port]/api to access api which can be configured with router
 app.use("/api", router)
 
-app.get("/", (req, res) => {
+//use [ipadress]:[port]/web to serve webpage inside /web dir
+app.use("/web", express.static(__dirname + "/web"))
+//when sending get request from there it gets sent to router.get (see below)
 
-    
+router.get("/", (req, res) => {
+    // in here send json with all names to be displayed
+
+    db.serialize( () => {
+        db.all("SELECT * FROM namelist", (err, rows) => {
+            //returns array, each entry is a single entry of the db as an
+            console.log(rows)
+            
+            res.send(rows)
+        })
+    })
+
+
+
 })
 
-// app.post("/", (req, res) => {
-//     console.log("wazaap")
 
-// })
 
+
+app.get("/", (req, res) => {
+    //this to get website inside /web
+    res.send("nothing here")
+    
+})
 
 
 
 //by  adding ip adress eg 192.168.178.40 for rpi makes it public on local network -- app.listen(Port Number, "Your IP Address");
 
-app.listen(port, () => {
+app.listen(port, "192.168.178.20", () => {
     console.log(`listening on port ${port}`)
 })
 
