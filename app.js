@@ -31,9 +31,9 @@ function insertNewValuesDB(insertArray) {
         for (let i of insertArray) {
             db.run(`INSERT INTO namelist VALUES ('${i}')`)
         }
-        db.all("SELECT rowid, * FROM namelist", (err, row) => {
-            console.log(row)
-        })
+        // db.all("SELECT rowid, * FROM namelist", (err, row) => {
+        //     console.log(row)
+        // })
 
 
         //ignore duplicates users fault    
@@ -44,14 +44,31 @@ function insertNewValuesDB(insertArray) {
 function deleteValuesDB(insertArray) {
     db.serialize( () => {
         //might need to change this to delete using rowid so that user doesn't delete multiple with same name
+        //it now deletes by rowid, where an array with all the id's are passed into
+
+        //https://stackoverflow.com/a/10554764
+
+        // this is stupid as fuck but i am stupidier
+        db.run(`CREATE TEMPORARY TABLE temp AS SELECT * FROM namelist`)    
+        db.run("DELETE FROM namelist")
+        db.run("INSERT INTO namelist SELECT * FROM temp")
+        db.run("DROP TABLE temp")
+
         for (let i of insertArray) {
+            console.log(i)
 
-            db.run(`DELETE FROM namelist WHERE name = '${i}'`)
+            // db.run("UPDATE namelist SET rowid = (SELECT COUNT(*) from namelist) WHERE rowid != 1")
+            db.run(`DELETE FROM namelist WHERE rowid = '${i}'`)
+            
         }
+        db.run(`CREATE TEMPORARY TABLE temp AS SELECT * FROM namelist`)    
+        db.run("DELETE FROM namelist")
+        db.run("INSERT INTO namelist SELECT * FROM temp")
+        db.run("DROP TABLE temp")
 
-        db.all("SELECT rowid, * FROM namelist", (err, row) => {
-            console.log(row)
-        })
+        // db.all("SELECT * FROM namelist", (err, row) => {
+        //     console.log(row)
+        // })
 
         //use this in the final implimentation        
 
@@ -61,7 +78,7 @@ function deleteValuesDB(insertArray) {
 
 // const requestValuesDB = db.serialize( () => {
 //     var t = []
-//     db.all("SELECT * FROM namelist", (err, rows) => {
+//     db.all("SELECT rowid, * FROM namelist", (err, rows) => {
 //         //returns array, each entry is a single entry of the db as an
 //         t = rows
 //         console.log(rows)
@@ -80,90 +97,6 @@ function requestValuesDB() {
     })
     return returnValue;
 }
-
-function updateDB(database_instance, nameArray) {
-    database_instance.serialize( () => {
-        database_instance.get("SELECT MAX(id) as id, name FROM namelist", (err, row) => {
-            console.log(row.id + ": " + row.name)
-            
-            for (let i = 0; i < nameArray.length; i++){
-                let currentName = nameArray[i];
-                var currentId = row.id + i;
-                console.log(currentId, currentName)
-                // database_instance.run(`INSERT INTO namelist VALUES (${}`)
-                
-            }
-        })
-
-
-        //gets name with highest id aka the name that was addet latest 
-       
-    })
-}
-
-
-function removeDuplicates(newData) {
-
-    var stored_array = ["tim", "toby", "peter"]
-    //make every value in stored_array lowercase... as a safeguard for me forgetting to store them as lowercase only
-    stored_array.forEach( (element, index) => {
-        stored_array[index] = element.toLowerCase()
-    })
-
-
-    console.log(stored_array)
-
-    
-    //all new names in lowercase go in here
-    var tempArray = []
-    tempArray = tempArray.concat(newData)
-
-    
-    const mergedArray = stored_array.concat(tempArray)
-    const result = mergedArray.filter( (item, idx) => {
-        
-        let stringToCompare = item.toLowerCase()
-        if (mergedArray.indexOf(stringToCompare) === idx) {
-            return item
-        }
-    })
-
-
-    console.log(result)
-
-
-}
-
-
-
-const logger = function (req, res, next) {
-    console.log(req.method.toLowerCase())
-
-    if (req.method.toLowerCase() === "get") {
-        
-            const options = {
-                method: 'POST',
-                body: '{"names":["hi","tiM","tom","toby"],"device":"test"}'
-              };
-              
-              fetch('http://192.168.178.20:3000/api', options)
-                // .then(response => response.json())
-                // .then(response => console.log(response))
-                .catch(err => console.error(err));
-        
-                
-            //this gets sent to webpage @localhost:3000/api which teh screen will display after any request sent to /api
-            // but we only want to respond in this function if its a get request, in order to display on webpage
-            //this gets skipped if its a post request & continues @ router.post
-            res.send('hi')
-
-
-    }
-
-
-    next()
-}
-// router.use(logger)
 
 
 
@@ -190,7 +123,7 @@ router.post("/", (req, res, next) => {
     // }
 
     if (req.body.action === "delete") {
-        deleteValuesDB(req.body.delete)
+        deleteValuesDB(req.body.names)
 
     }
     
@@ -199,10 +132,18 @@ router.post("/", (req, res, next) => {
 
     }
     
-    res.json({
-        valid: true,
-        message: `${req.body.names} : ${req.body.delete} \n ${req.body.action}`
+    //this has to get the new list from database
+
+    db.serialize( () => {
+        db.all("SELECT rowid, * FROM namelist", (err, rows) => {
+            //console.log(rows)
+            res.send(rows);
+        })
     })
+    // res.json({
+    //     valid: true,
+    //     message: req.body.action
+    // })
 
 
 
@@ -221,7 +162,7 @@ router.get("/", (req, res) => {
     // in here send json with all names to be displayed
 
     db.serialize( () => {
-        db.all("SELECT * FROM namelist", (err, rows) => {
+        db.all("SELECT rowid, * FROM namelist", (err, rows) => {
             //returns array, each entry is a single entry of the db as an
             console.log(rows)
             
@@ -238,7 +179,9 @@ router.get("/", (req, res) => {
 
 app.get("/", (req, res) => {
     //this to get website inside /web
-    res.send("nothing here")
+    res.json( {
+        online: true
+    })
     
 })
 
