@@ -1,0 +1,3 @@
+create settings menu inside app to edit ip adress.
+
+make website with ajax auto get newest data
