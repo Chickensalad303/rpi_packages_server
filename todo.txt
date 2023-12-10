@@ -2,3 +2,5 @@ create settings menu inside app to edit ip adress.
 make server console.log its ip adress, so you don't need access to router to get ip adress
 
 make website with ajax auto get newest data
+
+inside the flutter app impliment the settings (right now gui works but does nutting)

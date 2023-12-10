@@ -1,3 +1,4 @@
+const { networkInterfaces } = require("os")
 const express = require("express")
 const app = express()
 var bodyParser = require("body-parser")
@@ -11,6 +12,63 @@ app.use(bodyParser.urlencoded({extended: true}))
 app.use(bodyParser.json())
 
 const router = express.Router()
+
+function getIPofServer() {
+    //if it returns null, it will just run on localhost for now
+    var ipv4Adress = null
+    
+    let nonLocalInterfaces = {}
+    for (let inet in networkInterfaces()) {
+        let adresses = networkInterfaces()[inet]
+        for (let i = 0; i < adresses.length; i++) {
+            let adress = adresses[i]
+            if (!adress.internal) {
+                if (!nonLocalInterfaces[inet]) {
+                    nonLocalInterfaces[inet] = []
+                }
+                nonLocalInterfaces[inet].push(adress)
+            }
+        }
+    }
+    
+    var ethernet = null
+    try {
+        ethernet = nonLocalInterfaces.Ethernet
+    } catch {
+        ethernet = null
+    }
+    if (ethernet != null) {
+        for (let i = 0; i < ethernet.length; i++) {
+            let EthObject = ethernet[i]
+            
+            if (Object.values(EthObject).includes("IPv4")) {
+                ipv4Adress = EthObject.address
+                // console.log(ipv4Adress)
+                return ipv4Adress
+            }
+        }
+    }
+    
+    var wifi = null
+    try {
+        wifi = nonLocalInterfaces.WiFi
+    } catch  {
+        wifi = null
+    }
+    if (wifi != null) {
+        for (let i = 0; i < wifi.length; i++) {
+            
+            let wifiObject = wifi[i]
+            if (Object.values(wifiObject).includes("IPv4")) {
+                ipv4Adress = wifiObject.address
+                // console.log(ipv4Adress)
+                return ipv4Adress
+            }
+        }
+    }
+    // console.log(nonLocalInterfaces)
+    return ipv4Adress
+}
 
 
 
@@ -187,10 +245,11 @@ app.get("/", (req, res) => {
 
 
 
+const ip = getIPofServer()
+// console.log(ip)
 //by  adding ip adress eg 192.168.178.40 for rpi makes it public on local network -- app.listen(Port Number, "Your IP Address");
-
-app.listen(port, "192.168.178.20", () => {
-    console.log(`listening on port ${port}`)
+app.listen(port, ip, () => {
+    console.log(`listening on ${ip}:${port}`)
 })
 
 
