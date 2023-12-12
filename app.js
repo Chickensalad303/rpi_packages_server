@@ -250,6 +250,7 @@ const ip = getIPofServer()
 //by  adding ip adress eg 192.168.178.40 for rpi makes it public on local network -- app.listen(Port Number, "Your IP Address");
 app.listen(port, ip, () => {
     console.log(`listening on ${ip}:${port}`)
+    require("child_process").exec(`start http://${ip}:${port}/web`)
 })
 
 
