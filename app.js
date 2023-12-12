@@ -50,8 +50,10 @@ function getIPofServer() {
     var ethernet = null
     try {
         if (nonLocalInterfaces.Ethernet != null) {
+            //for windows
             ethernet = nonLocalInterfaces.Ethernet
         } else if (nonLocalInterfaces.lo != null) {
+            //for linux
             ethernet = nonLocalInterfaces.lo
         }
     } catch {
@@ -73,8 +75,10 @@ function getIPofServer() {
     try {
         //check windows (WiFi)
         if (nonLocalInterfaces.WiFi != null) {
+            //this is windows
             wifi = nonLocalInterfaces.WiFi
         } else if (nonLocalInterfaces.wlan0 != null) {
+            //this is for linux
             wifi = nonLocalInterfaces.wlan0
         }
     } catch  {
