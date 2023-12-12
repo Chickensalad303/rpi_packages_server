@@ -8,8 +8,9 @@ const sqlite3 = require("sqlite3").verbose()
 // https://peter.sh/experiments/chromium-command-line-switches/#start-fullscreen
 async function dynamicImportOpen(string) {
     const open = await import("open")
+    // --kiosk & --private-window together call fullscreen
     //open.default calls the open() function
-    open.default(string, {app: {name: "chromium"}})
+    open.default(string, {app: {name: "firefox", arguments: ["--kiosk", "--private-window"]}})
 }
 
 
