@@ -9,10 +9,13 @@ const sqlite3 = require("sqlite3").verbose()
 // all of these should also apply to firefox
 async function dynamicImportOpen(string) {
     const open = await import("open")
-    // --kiosk to only enable barebones browser, --start-fullscreen is self explanatory
+    // --kiosk to only enable barebones browser
     // --display=:0.0 to make it play nice with ssh, vncViewer and external screen via hdmi
     // NOTE: --display=:0.0 only works on linux (tested on rpi only tho), remove if on windows
-    open.default(string, {app: {name: "firefox", arguments: [
+
+    //UPDATE: firefox kiosk mode wont do fullscreen probs due to wierd aspect ratio of monitor idk asda
+    //just use chromium for now
+    open.default(string, {app: {name: "chromium-browser", arguments: [
         "--kiosk", "--display=:0.0"
     ]}})
     //open.default calls the open() function
