@@ -33,7 +33,11 @@ function getIPofServer() {
     
     var ethernet = null
     try {
-        ethernet = nonLocalInterfaces.Ethernet
+        if (nonLocalInterfaces.Ethernet != null) {
+            ethernet = nonLocalInterfaces.Ethernet
+        } else if (nonLocalInterfaces.lo != null) {
+            ethernet = nonLocalInterfaces.lo
+        }
     } catch {
         ethernet = null
     }
@@ -51,7 +55,12 @@ function getIPofServer() {
     
     var wifi = null
     try {
-        wifi = nonLocalInterfaces.WiFi
+        //check windows (WiFi)
+        if (nonLocalInterfaces.WiFi != null) {
+            wifi = nonLocalInterfaces.WiFi
+        } else if (nonLocalInterfaces.wlan0 != null) {
+            wifi = nonLocalInterfaces.wlan0
+        }
     } catch  {
         wifi = null
     }
