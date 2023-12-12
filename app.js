@@ -73,7 +73,6 @@ function getIPofServer() {
     
     var wifi = null
     try {
-        //check windows (WiFi)
         if (nonLocalInterfaces.WiFi != null) {
             //this is windows
             wifi = nonLocalInterfaces.WiFi
