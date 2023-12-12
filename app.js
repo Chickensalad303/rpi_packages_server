@@ -13,7 +13,7 @@ async function dynamicImportOpen(string) {
     // --display=:0.0 to make it play nice with ssh, vncViewer and external screen via hdmi
     // NOTE: --display=:0.0 only works on linux (tested on rpi only tho), remove if on windows
     open.default(string, {app: {name: "firefox", arguments: [
-        "--kiosk", "--start-fullscreen", "--display=:0.0"
+        "--kiosk", "--display=:0.0"
     ]}})
     //open.default calls the open() function
 }
