@@ -15,7 +15,7 @@ async function dynamicImportOpen(string) {
 
     //UPDATE: firefox kiosk mode wont do fullscreen probs due to wierd aspect ratio of monitor idk asda
     //just use chromium for now (which is the default, which is run by usin apps.browser)
-    open.default(string, {app: {name: open.apps.browser, arguments: [
+    open.default(string, {app: {name: "chromium-browser", arguments: [
         "--kiosk", "--display=:0.0"
     ]}})
     //open.default calls the open() function
