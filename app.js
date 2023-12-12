@@ -6,11 +6,16 @@ var bodyParser = require("body-parser")
 const sqlite3 = require("sqlite3").verbose()
 
 // https://peter.sh/experiments/chromium-command-line-switches/#start-fullscreen
+// all of these should also apply to firefox
 async function dynamicImportOpen(string) {
     const open = await import("open")
-    // --kiosk & --private-window together call fullscreen
+    // --kiosk to only enable barebones browser, --start-fullscreen is self explanatory
+    // --display=:0.0 to make it play nice with ssh, vncViewer and external screen via hdmi
+    // NOTE: --display=:0.0 only works on linux (tested on rpi only tho), remove if on windows
+    open.default(string, {app: {name: "firefox", arguments: [
+        "--kiosk", "--start-fullscreen", "--display=:0.0"
+    ]}})
     //open.default calls the open() function
-    open.default(string, {app: {name: "firefox", arguments: ["--kiosk", "--private-window"]}})
 }
 
 
