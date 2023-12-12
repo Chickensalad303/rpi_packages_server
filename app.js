@@ -5,6 +5,11 @@ var bodyParser = require("body-parser")
 
 const sqlite3 = require("sqlite3").verbose()
 
+async function dynamicImportOpen(string) {
+    const open = await import("open")
+    open.default(string)
+}
+
 
 const port = 3000
 
@@ -259,7 +264,8 @@ const ip = getIPofServer()
 //by  adding ip adress eg 192.168.178.40 for rpi makes it public on local network -- app.listen(Port Number, "Your IP Address");
 app.listen(port, ip, () => {
     console.log(`listening on ${ip}:${port}`)
-    require("child_process").exec(`open http://${ip}:${port}/web --start-fullscreen`)
+    //require("child_process").exec(`open http://${ip}:${port}/web`)
+    dynamicImportOpen(`http://${ip}:${port}/web`)
 })
 
 
