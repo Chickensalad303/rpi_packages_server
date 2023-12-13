@@ -1,3 +1,7 @@
+//use pm2 daemon to run server for "production" aka run daemonized (in background)
+//https://github.com/Unitech/pm2
+//https://dev.to/bogdaaamn/run-your-nodejs-application-on-a-headless-raspberry-pi-4jnn
+
 const { networkInterfaces } = require("os")
 const express = require("express")
 const app = express()
