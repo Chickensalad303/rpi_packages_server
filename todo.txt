@@ -1,10 +1,11 @@
+make server app recieve user input to restart server/restart browser etc.
+
+
+UPDATE: this is kinda done for now:
 make website with ajax auto get newest data
 
 make app store latest ip input in localstorage, right now every time you 
 close and open again you have to type ip in again. ==> use shared_preferences in flutter
-
-
-UPDATE: this is kinda done for now:
 
 make server console.log its ip adress, so you don't need access to router to get ip adress
 
