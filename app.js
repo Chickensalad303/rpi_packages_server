@@ -254,7 +254,7 @@ router.get("/", (req, res) => {
     db.serialize( () => {
         db.all("SELECT rowid, * FROM namelist", (err, rows) => {
             //returns array, each entry is a single entry of the db as an
-            console.log(rows)
+            //console.log(rows)
             
             res.send(rows)
         })
