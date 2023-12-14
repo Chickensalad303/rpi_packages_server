@@ -145,7 +145,7 @@ function deleteValuesDB(insertArray) {
         db.run("DROP TABLE temp")
 
         for (let i of insertArray) {
-            console.log(i)
+            //console.log(i)
 
             // db.run("UPDATE namelist SET rowid = (SELECT COUNT(*) from namelist) WHERE rowid != 1")
             db.run(`DELETE FROM namelist WHERE rowid = '${i}'`)
