@@ -4,4 +4,4 @@ zenity --display=:0.0 --info --title="Server IP Address" --text="the servers IP 
 #just run chmod +x displayIP.sh to make it executable, then do ./displayIP.sh
 
 # for autostarting this script on boot
-# https://forums.raspberrypi.com/viewtopic.php?t=294014
+# https://forums.raspberrypi.com/viewtopic.php?t=294014 
