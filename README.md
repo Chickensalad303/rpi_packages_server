@@ -1,5 +1,5 @@
 # rpi_packages_server
-only tested on raspberry pi using raspberry pi os (with desktop environment)
+only tested on raspberry pi using raspberry pi os (with desktop environment).<br/>
 insatall all dependencies. then just run inside the projects folder:
 
 ```
